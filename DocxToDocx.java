@@ -17,9 +17,7 @@ package mnm.buildmyreport;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -46,13 +44,6 @@ import static java.util.Arrays.asList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import static mnm.buildmyreport.DocxToXcl.sequenceExportList;
-import org.docx4j.Docx4jProperties;
-import org.docx4j.utils.ResourceUtils;
 import org.docx4j.wml.BooleanDefaultTrue;
 import org.docx4j.wml.CTBookmark;
 import org.docx4j.wml.CTLanguage;
@@ -60,7 +51,6 @@ import org.docx4j.wml.Color;
 import org.docx4j.wml.HpsMeasure;
 import org.docx4j.wml.ParaRPr;
 import org.docx4j.wml.RFonts;
-import org.docx4j.wml.RPr;
 
 /**
  *
@@ -176,8 +166,7 @@ public class DocxToDocx extends AbstractSample {
     /**
      *
      * @param path
-     * @param list
-     * @param elementType
+     * @param type
      * @return
      * @throws Docx4JException
      * @throws JAXBException
@@ -243,8 +232,8 @@ public class DocxToDocx extends AbstractSample {
                 bodyOut.getContent().add(prependIndex(pfp.title, "Figure " + pfp.getIndex() + " "));
                 bodyOut.getContent().add(pfp.figure);
                 if (pfp.footer != null) {
-                    for (int j = 0; j < pfp.footer.size(); j++) {
-                        bodyOut.getContent().add(pfp.footer.get(j));
+                    for (P footer : pfp.footer) {
+                        bodyOut.getContent().add(footer);
                     }
                 }
             }
@@ -661,7 +650,7 @@ public class DocxToDocx extends AbstractSample {
         System.out.println("First pass done , now for second pass!!");
         System.out.println("--------------------------------------------");
 
-        BMRUtility BMRUtilityExporter = new BMRUtility();
+        InteractiveReportsUtility BMRUtilityExporter = new InteractiveReportsUtility();
         BMRUtilityExporter.setWordMLPkg(wordMLPackageIn);
         new TraversalUtil(body, BMRUtilityExporter);
 
@@ -725,7 +714,7 @@ public class DocxToDocx extends AbstractSample {
 
             client = new MongoClient(bmrp.getPropertyValue("db_host"), Integer.parseInt(bmrp.getPropertyValue("db_port")));
             mongoCollection = client.getDatabase(bmrp.getPropertyValue("db_name")).getCollection("reportcontents");
-        } catch (Exception e) {
+        } catch (IOException | NumberFormatException e) {
             client = new MongoClient("54.165.128.223", 27017);
             mongoCollection = client.getDatabase("mnmks").getCollection("reportcontents");
         }
